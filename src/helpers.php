@@ -3,17 +3,17 @@
 use Uniform\Guards\RecaptchaGuard;
 use Uniform\Exceptions\Exception as UniformException;
 
-if (!function_exists('recaptcha_field')) {
+if (!function_exists('recaptchaField')) {
     /**
      * Generate a reCAPTCHA form field
      *
      * @return string
      */
-    function recaptcha_field()
+    function recaptchaField()
     {
         $siteKey = option('expl0it3r.uniform-recaptcha.siteKey');
 
-        if (empty($key)) {
+        if (empty($siteKey)) {
             throw new UniformException('The reCAPTCHA sitekey for Uniform is not configured');
         }
 
