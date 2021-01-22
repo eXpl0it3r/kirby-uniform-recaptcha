@@ -1,0 +1,21 @@
+{
+    "name": "expl0it3r/kirby-uniform-recaptcha",
+    "description": "Kirby 3 reCAPTCHA guard for the Uniform plugin",
+    "type": "library",
+    "require": {
+        "mzur/kirby-uniform": "^4.0"
+    },
+    "license": "MIT",
+    "authors": [{
+        "name": "Lukas Dürrenberger",
+        "email": "eXpl0it3r@my-gate.net"
+    }],
+    "autoload": {
+        "psr-4": {
+            "Uniform\\Guards\\RecaptchaGuard": "src/Guards/RecaptchaGuard.php"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
