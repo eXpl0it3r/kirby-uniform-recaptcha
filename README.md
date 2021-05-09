@@ -22,7 +22,7 @@ git submodule add https://github.com/eXpl0it3r/kirby-uniform-recaptcha.git site/
 Add the plugin to your repository:
 
 ```
-composer require expl0it3r/uniform-recaptcha
+composer require expl0it3r/kirby-uniform-recaptcha
 ```
 
 ## Configuration
