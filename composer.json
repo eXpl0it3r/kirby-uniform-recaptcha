@@ -16,7 +16,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Uniform\\Guards\\RecaptchaGuard\\": "src/Guards/"
+            "Uniform\\Guards\\": "src/Guards/"
         }
     },
     "config": {
