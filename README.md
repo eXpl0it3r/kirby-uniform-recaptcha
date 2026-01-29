@@ -1,6 +1,6 @@
 # Uniform reCAPTCHA
 
-A [Kirby 3 & 4](https://getkirby.com/) plugin implementing a [Google reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) guard for the [Uniform](https://github.com/mzur/kirby-uniform) plugin.
+A [Kirby 3, 4 & 5](https://getkirby.com/) plugin implementing a [Google reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) guard for the [Uniform](https://github.com/mzur/kirby-uniform) plugin.
 
 ## Installation
 
