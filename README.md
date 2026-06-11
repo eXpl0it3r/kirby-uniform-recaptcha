@@ -39,57 +39,48 @@ return [
 
 - `siteKey` & `secretKey` can be found on the [reCAPTCHA admin page](https://www.google.com/recaptcha/admin/)
 - `acceptableScore` is the minimum score in range `0.0` to `1.0` (default `0.5`) required to accept the form submission, see the [reCAPTCHA documentation](https://developers.google.com/recaptcha/docs/v3)
+- `hostname` is optional (default empty / disabled). When set, the guard additionally checks that the `hostname` returned by Google matches this value.
 
 ## Usage
 
 ### Template
 
-reCAPTCHA v3 requires the form submission to happen through JavaScript.
-You can use the provided helper function, which creates a JavaScript callback function and an HTML `<button`>:
+reCAPTCHA v3 runs invisibly and requires the form submission to happen through JavaScript.
+Add the `recaptchaField()` helper inside your `<form>` and the `recaptchaScript()` helper somewhere on the page (e.g. before `</body>`):
 
 ```html+php
-<?= recaptchaButton('Submit', 'btn', 'ContactForm') ?>
+<?= recaptchaField() ?>
 ```
 
-Where the parameters are in order:
-- The text on the button itself
-- Additional CSS classes
-- The ID of the form
+`recaptchaField()` outputs a hidden input and a small script that, on submit, obtains a reCAPTCHA token and resubmits the form. It binds to its own form via the `submit` event, so:
 
-If you want full control, you can write something like the following:
+- It works no matter how the form is submitted (button click **or** the Enter key).
+- You keep full control over your markup — use any `<button type="submit">` you like.
+- No form `id` is required, and it can be used for multiple forms on the same page.
+- The original submit button's `name`/`value` is preserved (via `requestSubmit()`), so server-side form routing keeps working.
 
-```html+php
-<script>
-  function onRecaptchaFormSubmit(token) {
-    document.getElementById("ContactForm").submit();
-  }
-</script>
-<button class="g-recaptcha btn"
-        data-sitekey="<?= option('expl0it3r.uniform-recaptcha.siteKey') ?>"
-        data-callback="onRecaptchaFormSubmit"
-        data-action="UniformAction">Submit</button>
-```
-
-**Note:** The `data-action` is critical as it will be checked in the backend as well.
-
-In order for reCAPTCHA to work, you need to provide the reCAPTCHA JavaScript file from Google.
-
-Either include [the script](https://www.google.com/recaptcha/api.js) yourself or use the helper function `recaptchaScript()` in your template.
+In order for reCAPTCHA to work, you need to load the reCAPTCHA JavaScript file from Google.
+Either include [the script](https://www.google.com/recaptcha/api.js?render=your-site-key) yourself (with the `render` parameter set to your site key) or use the helper function `recaptchaScript()`.
 
 **Example**
 
 ```html+php
-<form action="<?= $page->url() ?>" method="post" id="ContactForm">
+<form action="<?= $page->url() ?>" method="post">
     <label for="name" class="required">Name</label>
     <input<?php if ($form->error('name')): ?> class="erroneous"<?php endif; ?> name="name" type="text" value="<?= $form->old('name') ?>">
 
     <!-- ... -->
 
     <?= csrf_field() ?>
-    <?= recaptchaButton('Submit', 'btn', 'ContactForm') ?>
+    <?= recaptchaField() ?>
+    <button type="submit">Submit</button>
 </form>
 <?= recaptchaScript() ?>
 ```
+
+> **Deprecated:** `recaptchaButton('Submit', 'btn', 'ContactForm')` is still available for backwards
+> compatibility but no longer recommended. It relies on reCAPTCHA's `data-callback` flow, which does
+> not trigger on Enter-key submits and requires knowing the form `id`. Use `recaptchaField()` instead.
 
 ### Controller
 
