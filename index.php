@@ -12,7 +12,8 @@ Kirby::plugin('expl0it3r/uniform-recaptcha', [
 	'options' => [
 		'siteKey' => '',
 		'secretKey' => '',
-		'acceptableScore' => 0.5
+		'acceptableScore' => 0.5,
+		'hostname' => ''
 	],
 	'translations' => [
 		'de'    => @include_once __DIR__ . '/i18n/de.php',
