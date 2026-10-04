@@ -16,8 +16,8 @@ Kirby::plugin('expl0it3r/uniform-recaptcha', [
         'hostname' => ''
     ],
     'translations' => [
-        'de'    => @include_once __DIR__ . '/i18n/de.php',
-        'en'    => @include_once __DIR__ . '/i18n/en.php',
-        'nl'    => @include_once __DIR__ . '/i18n/nl.php'
+        'de' => require __DIR__ . '/i18n/de.php',
+        'en' => require __DIR__ . '/i18n/en.php',
+        'nl' => require __DIR__ . '/i18n/nl.php'
     ]
 ]);
