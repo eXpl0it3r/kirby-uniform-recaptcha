@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [2.0.0](https://github.com/eXpl0it3r/kirby-uniform-recaptcha/compare/1.0.2...2.0.0) - 2026-10-04
 
 Switches the plugin to reCAPTCHA v3, which needs a score-based key. Existing v2 keys don't work anymore, see the README for the new configuration.
 
