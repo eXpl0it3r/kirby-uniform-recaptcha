@@ -46,31 +46,37 @@ if (!function_exists('recaptchaField')) {
     form.addEventListener('submit', function (e) {
         // requestSubmit() fires the event a second time, that one has to go through
         if (submitting) { return; }
+
+        // Without the reCAPTCHA script there's no token and the server rejects the form with a message,
+        // which is still better than a submit button that silently does nothing
+        if (typeof grecaptcha === 'undefined') { return; }
+
         e.preventDefault();
 
         var submitter = e.submitter || null;
 
+        var send = function () {
+            submitting = true;
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit(submitter);
+                return;
+            }
+            // Safari < 16 has no requestSubmit(), as such the button's name and value are added by hand
+            if (submitter && submitter.name) {
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = submitter.name;
+                hidden.value = submitter.value;
+                form.appendChild(hidden);
+            }
+            form.submit();
+        };
+
         grecaptcha.ready(function () {
             grecaptcha.execute({$siteKeyJs}, { action: {$actionJs} }).then(function (token) {
                 input.value = token;
-                submitting = true;
-                if (typeof form.requestSubmit === 'function') {
-                    form.requestSubmit(submitter);
-                } else {
-                    // Safari < 16 has no requestSubmit(), as such the button's name and value are added by hand
-                    if (submitter && submitter.name) {
-                        var hidden = document.createElement('input');
-                        hidden.type = 'hidden';
-                        hidden.name = submitter.name;
-                        hidden.value = submitter.value;
-                        form.appendChild(hidden);
-                    }
-                    form.submit();
-                }
-            }).catch(function () {
-                // Without a token the form isn't sent, as such the visitor can try again
-                submitting = false;
-            });
+                send();
+            }, send);
         });
     });
 })();
