@@ -7,42 +7,36 @@ use Throwable;
 use Uniform\Exceptions\Exception;
 
 /**
- * Uniform guard using Google reCAPTCHA v3
+ * Uniform guard using Google reCAPTCHA v3 (score-based keys)
  */
 class RecaptchaGuard extends Guard
 {
     /**
      * reCAPTCHA HTML input field name
-     *
-     * @var string
      */
-    const FieldName = 'g-recaptcha-response';
+    public const FieldName = 'g-recaptcha-response';
 
     /**
      * reCAPTCHA action name used
-     *
-     * @var string
      */
-    const ActionName = 'UniformAction';
+    public const ActionName = 'UniformAction';
 
     /**
      * URL for the reCAPTCHA verification
-     *
-     * @var string
      */
-    const VerificationUrl = 'https://www.google.com/recaptcha/api/siteverify';
+    public const VerificationUrl = 'https://www.google.com/recaptcha/api/siteverify';
 
     /**
      * {@inheritDoc}
      *
-     * Verify the reCAPTCHA challenge with Google.
+     * Verify the reCAPTCHA token with Google.
      * Remove the field from the form data if it was correct.
      */
     public function perform()
     {
-        $recaptchaChallenge = kirby()->request()->get(self::FieldName, '');
+        $token = kirby()->request()->get(self::FieldName, '');
 
-        if (empty($recaptchaChallenge)) {
+        if (empty($token)) {
             $this->reject(t('uniform-recaptcha-empty'), self::FieldName);
         }
 
@@ -52,36 +46,30 @@ class RecaptchaGuard extends Guard
             throw new Exception('The reCAPTCHA secret key for Uniform is not configured');
         }
 
-        $acceptableScore = option('expl0it3r.uniform-recaptcha.acceptableScore');
+        $data = [
+            'secret'   => $secretKey,
+            'response' => $token,
+            'remoteip' => kirby()->visitor()->ip(),
+        ];
 
-        // Verify the token with Google. Use a POST request so the secret stays
-        // out of the URL (and any logs), and handle transport errors instead of
-        // letting a raw file_get_contents() warning surface.
+        // POST keeps the secret out of the URL and the server logs
         try {
-            $remote = Remote::post(self::VerificationUrl, [
-                'data' => [
-                    'secret'   => $secretKey,
-                    'response' => $recaptchaChallenge,
-                    'remoteip' => kirby()->visitor()->ip(),
-                ],
-            ]);
-
+            $remote = Remote::post(self::VerificationUrl, ['data' => $data]);
             $response = $remote->code() === 200 ? $remote->json() : null;
-        } catch (Throwable $e) {
-            // Network/transport failure: fail closed.
+        } catch (Throwable) {
+            // If Google can't be reached, the form must not go through unchecked
             $response = null;
         }
 
         if (
-            empty($response) ||
+            is_array($response) === false ||
             ($response['success'] ?? false) !== true ||
-            ($response['score'] ?? 0) < $acceptableScore ||
+            ($response['score'] ?? 0) < (float)option('expl0it3r.uniform-recaptcha.acceptableScore') ||
             ($response['action'] ?? null) !== self::ActionName
         ) {
             $this->reject(t('uniform-recaptcha-invalid'), self::FieldName);
         }
 
-        // Optional hostname check: only enforced when the option is configured.
         $expectedHostname = option('expl0it3r.uniform-recaptcha.hostname');
 
         if (!empty($expectedHostname) && ($response['hostname'] ?? null) !== $expectedHostname) {

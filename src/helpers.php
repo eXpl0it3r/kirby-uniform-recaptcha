@@ -5,13 +5,11 @@ use Uniform\Exceptions\Exception as UniformException;
 
 if (!function_exists('recaptchaField')) {
     /**
-     * Generate the reCAPTCHA v3 hidden input field and the submit handler that
-     * fetches a token via grecaptcha.execute() right before the form is sent.
+     * Generate the hidden reCAPTCHA input and the script that requests a token right before the form is sent.
      *
-     * Place this inside the <form>, e.g. just before the submit button. The
-     * handler binds to the input's own form, so no form id is needed and it is
-     * safe to use multiple times on the same page. The original submitter (and
-     * therefore its name/value, e.g. `form_id`) is preserved via requestSubmit().
+     * Place it inside the <form>. The script binds to the form of its input, as such no form ID is needed
+     * and multiple forms on the same page work. The submit button that was used keeps its name and value,
+     * as the form is resubmitted with requestSubmit().
      *
      * @return string
      */
@@ -25,9 +23,7 @@ if (!function_exists('recaptchaField')) {
 
         $jsFlags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
 
-        // HTML attribute context for the input name.
         $fieldAttr = esc(RecaptchaGuard::FieldName, 'attr');
-        // JavaScript string-literal contexts (json_encode emits safe quoted literals).
         $fieldJs = json_encode(RecaptchaGuard::FieldName, $jsFlags);
         $siteKeyJs = json_encode($siteKey, JSON_UNESCAPED_SLASHES | $jsFlags);
         $actionJs = json_encode(RecaptchaGuard::ActionName, $jsFlags);
@@ -48,7 +44,7 @@ if (!function_exists('recaptchaField')) {
     var submitting = false;
 
     form.addEventListener('submit', function (e) {
-        // requestSubmit() re-fires the submit event; skip on the second pass.
+        // requestSubmit() fires the event a second time, that one has to go through
         if (submitting) { return; }
         e.preventDefault();
 
@@ -59,11 +55,9 @@ if (!function_exists('recaptchaField')) {
                 input.value = token;
                 submitting = true;
                 if (typeof form.requestSubmit === 'function') {
-                    // Preserves the submitter's name/value (e.g. form_id).
                     form.requestSubmit(submitter);
                 } else {
-                    // Legacy fallback (e.g. Safari < 16): re-add the submitter
-                    // as a hidden input so server-side routing still works.
+                    // Safari < 16 has no requestSubmit(), as such the button's name and value are added by hand
                     if (submitter && submitter.name) {
                         var hidden = document.createElement('input');
                         hidden.type = 'hidden';
@@ -74,7 +68,7 @@ if (!function_exists('recaptchaField')) {
                     form.submit();
                 }
             }).catch(function () {
-                // Allow the user to retry on failure.
+                // Without a token the form isn't sent, as such the visitor can try again
                 submitting = false;
             });
         });
@@ -89,11 +83,8 @@ if (!function_exists('recaptchaButton')) {
     /**
      * Generate a reCAPTCHA form button and form submission callback.
      *
-     * @deprecated Use recaptchaField() together with your own <button> instead.
-     *             This function relies on the reCAPTCHA `data-callback` flow,
-     *             which does not trigger when the form is submitted via the
-     *             Enter key and requires knowing the form id. recaptchaField()
-     *             binds to the form's submit event and works with multiple forms.
+     * @deprecated Use recaptchaField() with your own <button> instead. The data-callback of this button
+     *             doesn't trigger when the form is sent with the Enter key and it needs the ID of the form.
      *
      * @param string $text   The button text
      * @param string $class  Any additional CSS class entries
@@ -116,10 +107,8 @@ if (!function_exists('recaptchaButton')) {
 
 if (!function_exists('recaptchaScript')) {
     /**
-     * Generate the script tag that loads the reCAPTCHA v3 JavaScript API.
-     *
-     * reCAPTCHA v3 requires the site key to be passed via the `render`
-     * query parameter so that grecaptcha.execute() can be called.
+     * Generate the script tag that loads the reCAPTCHA JavaScript API.
+     * The site key has to be passed as render parameter, otherwise grecaptcha.execute() can't be called.
      *
      * @return string
      */
