@@ -110,6 +110,9 @@ if (!function_exists('recaptchaScript')) {
      */
     function recaptchaScript()
     {
-        return Html::tag('script', '', ['src' => 'https://www.google.com/recaptcha/api.js?render=' . urlencode(RecaptchaGuard::siteKey())]);
+        $host = option('expl0it3r.uniform-recaptcha.scriptHost', 'www.google.com');
+        $url = 'https://' . $host . '/recaptcha/api.js?render=' . urlencode(RecaptchaGuard::siteKey());
+
+        return Html::tag('script', '', ['src' => $url, 'async' => true, 'defer' => true]);
     }
 }

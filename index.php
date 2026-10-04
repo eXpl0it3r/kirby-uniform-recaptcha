@@ -14,7 +14,8 @@ Kirby::plugin('expl0it3r/uniform-recaptcha', [
         'secretKey' => '',
         'acceptableScore' => 0.5,
         'hostname' => '',
-        'sendRemoteIp' => false
+        'sendRemoteIp' => false,
+        'scriptHost' => 'www.google.com'
     ],
     'translations' => [
         'de' => require __DIR__ . '/i18n/de.php',
