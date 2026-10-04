@@ -1,10 +1,10 @@
 {
     "name": "expl0it3r/kirby-uniform-recaptcha",
-    "description": "Kirby 3/4/5 reCAPTCHA guard for the Uniform plugin",
+    "description": "Google reCAPTCHA v3 guard for the Uniform plugin of Kirby",
     "type": "kirby-plugin",
     "require": {
-        "php": ">=8.2",
-        "mzur/kirby-uniform": "^5.0",
+        "php": ">=8.1",
+        "mzur/kirby-uniform": "^5.6.2",
         "getkirby/composer-installer": "^1.2"
     },
     "license": "MIT",
@@ -18,8 +18,5 @@
         "psr-4": {
             "Uniform\\Guards\\": "src/Guards/"
         }
-    },
-    "config": {
-        "optimize-autoloader": true
     }
 }
