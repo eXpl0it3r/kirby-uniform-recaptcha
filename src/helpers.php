@@ -1,7 +1,7 @@
 <?php
 
+use Kirby\Toolkit\Html;
 use Uniform\Guards\RecaptchaGuard;
-use Uniform\Exceptions\Exception as UniformException;
 
 if (!function_exists('recaptchaField')) {
     /**
@@ -15,17 +15,11 @@ if (!function_exists('recaptchaField')) {
      */
     function recaptchaField()
     {
-        $siteKey = option('expl0it3r.uniform-recaptcha.siteKey');
-
-        if (empty($siteKey)) {
-            throw new UniformException('The reCAPTCHA sitekey for Uniform is not configured');
-        }
-
         $jsFlags = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
 
         $fieldAttr = esc(RecaptchaGuard::FieldName, 'attr');
         $fieldJs = json_encode(RecaptchaGuard::FieldName, $jsFlags);
-        $siteKeyJs = json_encode($siteKey, JSON_UNESCAPED_SLASHES | $jsFlags);
+        $siteKeyJs = json_encode(RecaptchaGuard::siteKey(), JSON_UNESCAPED_SLASHES | $jsFlags);
         $actionJs = json_encode(RecaptchaGuard::ActionName, $jsFlags);
 
         return <<<HTML
@@ -100,14 +94,10 @@ if (!function_exists('recaptchaButton')) {
      */
     function recaptchaButton($text, $class, $formId)
     {
-        $siteKey = option('expl0it3r.uniform-recaptcha.siteKey');
+        $formIdJs = json_encode($formId, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
 
-        if (empty($siteKey)) {
-            throw new UniformException('The reCAPTCHA sitekey for Uniform is not configured');
-        }
-
-        return '<script>function onRecaptchaFormSubmit(token) { document.getElementById("'.$formId.'").submit(); }</script>
-        <button class="g-recaptcha '.$class.'" data-sitekey="'.$siteKey.'" data-callback="onRecaptchaFormSubmit" data-action="UniformAction">'.$text.'</button>';
+        return '<script>function onRecaptchaFormSubmit(token) { document.getElementById(' . $formIdJs . ').submit(); }</script>
+        <button class="g-recaptcha ' . esc($class, 'attr') . '" data-sitekey="' . esc(RecaptchaGuard::siteKey(), 'attr') . '" data-callback="onRecaptchaFormSubmit" data-action="' . RecaptchaGuard::ActionName . '">' . esc($text) . '</button>';
     }
 }
 
@@ -120,12 +110,6 @@ if (!function_exists('recaptchaScript')) {
      */
     function recaptchaScript()
     {
-        $siteKey = option('expl0it3r.uniform-recaptcha.siteKey');
-
-        if (empty($siteKey)) {
-            throw new UniformException('The reCAPTCHA sitekey for Uniform is not configured');
-        }
-
-        return '<script src="https://www.google.com/recaptcha/api.js?render='.urlencode($siteKey).'"></script>';
+        return Html::tag('script', '', ['src' => 'https://www.google.com/recaptcha/api.js?render=' . urlencode(RecaptchaGuard::siteKey())]);
     }
 }

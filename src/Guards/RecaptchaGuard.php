@@ -85,6 +85,20 @@ class RecaptchaGuard extends Guard
     }
 
     /**
+     * Returns the configured site key or throws, as reCAPTCHA can't work without it
+     */
+    public static function siteKey(): string
+    {
+        $siteKey = option('expl0it3r.uniform-recaptcha.siteKey');
+
+        if (empty($siteKey)) {
+            throw new Exception('The reCAPTCHA sitekey for Uniform is not configured');
+        }
+
+        return $siteKey;
+    }
+
+    /**
      * Once a project without billing is over the free quota, Google answers with success and a score of 0.9,
      * but adds "Over free quota." as error message. Google doesn't document which field carries the message,
      * as such any non-empty error field counts.
