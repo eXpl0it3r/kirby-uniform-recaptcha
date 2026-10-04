@@ -49,8 +49,12 @@ class RecaptchaGuard extends Guard
         $data = [
             'secret'   => $secretKey,
             'response' => $token,
-            'remoteip' => kirby()->visitor()->ip(),
         ];
+
+        // Google lists the IP as optional, as such it's only sent when asked for
+        if (option('expl0it3r.uniform-recaptcha.sendRemoteIp') === true) {
+            $data['remoteip'] = kirby()->visitor()->ip();
+        }
 
         // POST keeps the secret out of the URL and the server logs
         try {
